@@ -1,7 +1,25 @@
-// frontend/src/components/Dashboard/EmissionsChart.js
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { Box, Card, CardContent, Typography } from '@mui/material';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const EmissionsChart = ({ data }) => {
   const chartData = {
@@ -15,30 +33,11 @@ const EmissionsChart = ({ data }) => {
     }]
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Emissions Over Time'
-      }
-    }
-  };
-
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Emissions Trend
-        </Typography>
-        <Box sx={{ height: 300 }}>
-          <Line data={chartData} options={options} />
-        </Box>
-      </CardContent>
-    </Card>
+    <div>
+      <h2>Emissions Over Time</h2>
+      <Line data={chartData} />
+    </div>
   );
 };
 

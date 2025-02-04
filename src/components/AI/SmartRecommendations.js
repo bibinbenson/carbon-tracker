@@ -1,139 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   Box, 
   Typography, 
   Card, 
   CardContent, 
-  CircularProgress,
-  Alert,
-  LinearProgress
+  Tooltip, 
+  IconButton 
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import { getEmissionsPrediction, getPersonalizedTips } from '../../services/aiService';
+import InfoIcon from '@mui/icons-material/Info';
 
 const SmartRecommendations = ({ userData, totalEmissions }) => {
-  const [predictions, setPredictions] = useState(null);
-  const [tips, setTips] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      if (!userData || !totalEmissions) return;
-      
-      try {
-        setLoading(true);
-        const [predictionData, tipsData] = await Promise.all([
-          getEmissionsPrediction(userData),
-          getPersonalizedTips({
-            ...userData,
-            totalEmissions
-          })
-        ]);
-
-        setPredictions(predictionData);
-        setTips(tipsData);
-      } catch (err) {
-        setError('Failed to load recommendations');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecommendations();
-  }, [userData, totalEmissions]);
-
-  if (loading) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Analyzing your data...
-        </Typography>
-        <LinearProgress color="success" />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
-  }
+  const recommendations = [
+    {
+      category: 'Transport',
+      tip: 'Consider using public transport more frequently',
+      impact: 'Potential saving: 20kg CO2/month'
+    },
+    {
+      category: 'Energy',
+      tip: 'Switch to LED bulbs and energy-efficient appliances',
+      impact: 'Potential saving: 15kg CO2/month'
+    },
+    {
+      category: 'Lifestyle',
+      tip: 'Reduce meat consumption by one day per week',
+      impact: 'Potential saving: 10kg CO2/month'
+    }
+  ];
 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Smart Insights
+        Smart Recommendations
       </Typography>
-
-      {predictions && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card 
-            sx={{ 
-              mb: 2, 
-              background: 'linear-gradient(45deg, #2e7d32 30%, #4caf50 90%)',
-              color: 'white'
-            }}
-          >
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {recommendations.map((rec, index) => (
+          <Card key={index} sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Emissions Forecast
-              </Typography>
-              <Typography variant="body1">
-                Projected monthly emissions: {predictions.projected.toFixed(1)} kg CO₂
-              </Typography>
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="body2">
-                  Potential reduction: {predictions.potentialReduction.toFixed(1)}%
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1" color="primary">
+                  {rec.category}
                 </Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={predictions.potentialReduction} 
-                  sx={{ mt: 1, bgcolor: 'rgba(255,255,255,0.2)' }}
-                />
+                <Tooltip title="Based on your usage patterns">
+                  <IconButton size="small">
+                    <InfoIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
+              <Typography variant="body1" sx={{ mt: 1 }}>
+                {rec.tip}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                {rec.impact}
+              </Typography>
             </CardContent>
           </Card>
-        </motion.div>
-      )}
-
-      <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-        Personalized Recommendations
-      </Typography>
-      
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {tips.map((tip, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <Card 
-              sx={{ 
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  transition: 'transform 0.3s ease-in-out'
-                }
-              }}
-            >
-              <CardContent>
-                <Typography variant="body1" gutterBottom>
-                  {tip.content}
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  color="success.main"
-                  sx={{ display: 'block', mt: 1 }}
-                >
-                  Potential impact: {tip.impact} kg CO₂ reduction
-                </Typography>
-              </CardContent>
-            </Card>
-          </motion.div>
         ))}
       </Box>
     </Box>

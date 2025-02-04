@@ -1,29 +1,25 @@
-// frontend/src/components/Community/CommunityHub.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography, 
   Card, 
   CardContent, 
-  Avatar, 
-  Button,
-  Grid,
-  Divider 
+  Avatar,
+  Grid 
 } from '@mui/material';
 
 const CommunityHub = () => {
-  const [communityStats, setCommunityStats] = useState({
-    totalUsers: 0,
-    totalEmissionsReduced: 0,
-    activeUsers: 0
+  const [communityStats] = useState({
+    totalUsers: 150,
+    totalEmissionsReduced: 2500,
+    activeUsers: 89
   });
 
-  const [topContributors, setTopContributors] = useState([]);
-
-  // Fetch community data
-  useEffect(() => {
-    // Add API call here
-  }, []);
+  const [topContributors] = useState([
+    { id: 1, name: 'Alice Green', avatar: '', reductions: 450 },
+    { id: 2, name: 'Bob Smith', avatar: '', reductions: 380 },
+    { id: 3, name: 'Charlie Brown', avatar: '', reductions: 310 }
+  ]);
 
   return (
     <Box>
@@ -51,7 +47,7 @@ const CommunityHub = () => {
               <Typography variant="h6" gutterBottom>
                 Top Contributors
               </Typography>
-              {topContributors.map((contributor, index) => (
+              {topContributors.map((contributor) => (
                 <Box
                   key={contributor.id}
                   sx={{

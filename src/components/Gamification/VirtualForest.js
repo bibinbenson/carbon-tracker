@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, LinearProgress, Tooltip } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const TREE_STAGES = {
   SEED: '🌱',
@@ -12,18 +12,15 @@ const TREE_STAGES = {
 
 const VirtualForest = ({ healthStatus }) => {
   const [trees, setTrees] = useState([]);
-  const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
-    const treeCount = Math.ceil(healthStatus / 20); // 1-5 trees based on health
+    const treeCount = Math.ceil(healthStatus / 20);
     const newTrees = Array(5).fill(null).map((_, index) => ({
       id: index,
       stage: index < treeCount ? getTreeStage(healthStatus) : 'SEED',
       active: index < treeCount
     }));
-    setAnimating(true);
     setTrees(newTrees);
-    setTimeout(() => setAnimating(false), 500);
   }, [healthStatus]);
 
   const getTreeStage = (health) => {
@@ -70,44 +67,33 @@ const VirtualForest = ({ healthStatus }) => {
           flexWrap: 'wrap'
         }}
       >
-        <AnimatePresence>
-          {trees.map((tree, index) => (
-            <motion.div
-              key={tree.id}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ 
-                scale: tree.active ? 1 : 0.5, 
-                opacity: tree.active ? 1 : 0.3 
-              }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: tree.active ? 1.1 : 0.5 }}
+        {trees.map((tree) => (
+          <motion.div
+            key={tree.id}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ 
+              scale: tree.active ? 1 : 0.5, 
+              opacity: tree.active ? 1 : 0.3 
+            }}
+            whileHover={{ scale: tree.active ? 1.1 : 0.5 }}
+          >
+            <Tooltip 
+              title={`Tree ${tree.id + 1}: ${tree.active ? 'Healthy' : 'Inactive'}`}
+              arrow
             >
-              <Tooltip 
-                title={`Tree ${index + 1}: ${tree.active ? 'Healthy' : 'Inactive'}`}
-                arrow
+              <Box
+                sx={{
+                  fontSize: '2rem',
+                  cursor: 'pointer',
+                  filter: tree.active ? 'none' : 'grayscale(100%)',
+                  transition: 'all 0.3s ease'
+                }}
               >
-                <Box
-                  sx={{
-                    fontSize: '2rem',
-                    cursor: 'pointer',
-                    filter: tree.active ? 'none' : 'grayscale(100%)',
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {TREE_STAGES[tree.stage]}
-                </Box>
-              </Tooltip>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </Box>
-
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="caption" color="text.secondary">
-          {healthStatus >= 80 ? '🌟 Thriving Forest!' : 
-           healthStatus >= 50 ? '🌱 Growing Strong' : 
-           '💪 Keep Going!'}
-        </Typography>
+                {TREE_STAGES[tree.stage]}
+              </Box>
+            </Tooltip>
+          </motion.div>
+        ))}
       </Box>
     </Box>
   );

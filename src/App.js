@@ -6,21 +6,34 @@ import SmartRecommendations from './components/AI/SmartRecommendations';
 import AchievementSystem from './components/Gamification/AchievementSystem';
 import ChallengeSystem from './components/Gamification/ChallengeSystem';
 import VirtualForest from './components/Gamification/VirtualForest';
-import SustainabilityTips from './components/Education/SustainabilityTips';
-import Leaderboard from './components/Gamification/Leaderboard';
 import EmissionsChart from './components/Dashboard/EmissionsChart';
 import CommunityHub from './components/Community/CommunityHub';
+import SustainabilityTips from './components/Education/SustainabilityTips';
+import Leaderboard from './components/Gamification/Leaderboard';
 import AchievementNotification from './components/Notifications/AchievementNotification';
 
 const App = () => {
   const [totalEmissions, setTotalEmissions] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState({
+    emissionsHistory: [
+      { date: '2024-01', emissions: 150 },
+      { date: '2024-02', emissions: 130 },
+      { date: '2024-03', emissions: 140 }
+    ]
+  });
   const [userPoints, setUserPoints] = useState(0);
   const [achievementNotification, setAchievementNotification] = useState(null);
 
   const handleEmissionsCalculated = (emissions, data) => {
     setTotalEmissions(emissions);
-    setUserData(data);
+    // Update emissions history when new calculation is made
+    setUserData(prev => ({
+      ...prev,
+      emissionsHistory: [
+        ...prev.emissionsHistory,
+        { date: new Date().toISOString().slice(0, 7), emissions }
+      ]
+    }));
   };
 
   const handleNewAchievement = (achievement) => {
@@ -51,7 +64,7 @@ const App = () => {
 
         <Grid item xs={12}>
           <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-            <EmissionsChart data={userData?.emissionsHistory || []} />
+            <EmissionsChart data={userData.emissionsHistory} />
           </Paper>
         </Grid>
 

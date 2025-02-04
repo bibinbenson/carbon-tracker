@@ -1,0 +1,59 @@
+/* Transition for tab content */
+.tab-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.tab-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+.tab-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tab-transition-exit-active {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+/* Styling for the tabs container */
+.MuiTabs-root {
+  background-color: #f4f4f4;
+  border-radius: 5px;
+}
+
+/* Styling for the tab buttons */
+.MuiTab-root {
+  font-weight: bold;
+  color: #3f51b5;
+}
+
+.MuiTab-root.Mui-selected {
+  background-color: #3f51b5;
+  color: white;
+}
+
+/* Smooth transitions for dropdowns */
+.MuiSelect-root {
+  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.MuiSelect-root:hover {
+  background-color: #e0e0e0;
+  transform: scale(1.05);
+}
+
+/* Smooth transition for the button */
+.MuiButton-root {
+  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.MuiButton-root:hover {
+  background-color: #1976d2;
+  transform: scale(1.05);
+}

@@ -1,0 +1,32 @@
+/* In App.css or ProgressTracker.css */
+.progress-tracker {
+  text-align: center;
+  margin: 20px;
+}
+
+.progress-bar {
+  background-color: #ddd;
+  height: 30px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.progress-bar .progress-text {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+}
+
+.badge {
+  margin-top: 20px;
+  background-color: gold;
+  padding: 10px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.badge h3 {
+  margin: 0;
+}

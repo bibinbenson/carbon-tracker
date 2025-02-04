@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +10,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
@@ -23,20 +23,31 @@ ChartJS.register(
 );
 
 const EmissionsChart = ({ data }) => {
-  console.log('Chart Data:', data); // Debugging line
+  if (!data || data.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 3 }}>
+        <Typography variant="body1" color="text.secondary">
+          No emissions data available yet
+        </Typography>
+      </Box>
+    );
+  }
 
   const chartData = {
-    labels: data?.map(d => d.date) || [],
-    datasets: [{
-      label: 'CO2 Emissions (kg)',
-      data: data?.map(d => d.emissions) || [],
-      fill: false,
-      borderColor: '#2e7d32',
-      backgroundColor: '#4caf50',
-      tension: 0.1,
-      pointRadius: 5,
-      pointHoverRadius: 7
-    }]
+    labels: data.map(d => d.date),
+    datasets: [
+      {
+        label: 'CO2 Emissions (kg)',
+        data: data.map(d => d.emissions),
+        borderColor: '#2e7d32',
+        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }
+    ]
   };
 
   const options = {
@@ -45,10 +56,6 @@ const EmissionsChart = ({ data }) => {
     plugins: {
       legend: {
         position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Your Emissions Over Time'
       },
       tooltip: {
         mode: 'index',
@@ -77,14 +84,8 @@ const EmissionsChart = ({ data }) => {
       <Typography variant="h6" gutterBottom>
         Emissions Trend
       </Typography>
-      <Box sx={{ height: 400, p: 2 }}>
-        {data && data.length > 0 ? (
-          <Line data={chartData} options={options} />
-        ) : (
-          <Typography color="textSecondary" sx={{ textAlign: 'center', mt: 10 }}>
-            No emissions data available yet. Start tracking to see your progress!
-          </Typography>
-        )}
+      <Box sx={{ height: 400 }}>
+        <Line data={chartData} options={options} />
       </Box>
     </Box>
   );

@@ -22,7 +22,11 @@ const App = () => {
     ]
   });
   const [userPoints, setUserPoints] = useState(0);
-  const [achievementNotification, setAchievementNotification] = useState(null);
+  const [achievementNotification, setAchievementNotification] = useState({
+  icon: '🏆',
+  name: 'Initial Achievement',
+  points: 0
+});
 
   const handleEmissionsCalculated = (emissions, data) => {
     setTotalEmissions(emissions);

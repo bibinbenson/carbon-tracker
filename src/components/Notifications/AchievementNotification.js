@@ -1,9 +1,10 @@
-// frontend/src/components/Notifications/AchievementNotification.js
 import React from 'react';
 import { Snackbar, Alert, Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 
 const AchievementNotification = ({ achievement, open, onClose }) => {
+  if (!achievement) return null;
+
   return (
     <Snackbar
       open={open}
@@ -26,14 +27,14 @@ const AchievementNotification = ({ achievement, open, onClose }) => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="h1" sx={{ mr: 2, fontSize: '2rem' }}>
-              {achievement.icon}
+              {achievement.icon || '🏆'}
             </Typography>
             <Box>
               <Typography variant="subtitle1">
                 New Achievement Unlocked!
               </Typography>
               <Typography variant="body2">
-                {achievement.name} - {achievement.points} points
+                {achievement.name || 'Achievement'} - {achievement.points || 0} points
               </Typography>
             </Box>
           </Box>

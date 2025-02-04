@@ -1,61 +1,84 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, Paper, IconButton, CircularProgress } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  Card, 
+  CardContent, 
+  IconButton, 
+  Tooltip,
+  CircularProgress,
+  Fade
+} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// Move defaultTips outside the component
+const CATEGORIES = {
+  TRANSPORT: {
+    icon: '🚌',
+    color: '#2196f3'
+  },
+  ENERGY: {
+    icon: '⚡',
+    color: '#ff9800'
+  },
+  FOOD: {
+    icon: '🥗',
+    color: '#4caf50'
+  }
+};
+
 const DEFAULT_TIPS = {
   TRANSPORT: [
     "Use public transportation when possible",
     "Consider carpooling with colleagues",
     "Walk or cycle for short distances",
-    "Maintain proper tire pressure for better fuel efficiency",
-    "Plan your trips to combine multiple errands"
+    "Maintain proper tire pressure",
+    "Combine multiple errands into one trip"
   ],
   ENERGY: [
     "Use natural light when possible",
-    "Switch to LED light bulbs",
+    "Switch to LED bulbs",
     "Unplug devices when not in use",
     "Use a programmable thermostat",
-    "Air dry clothes when weather permits"
+    "Air dry clothes when possible"
   ],
   FOOD: [
     "Plan meals to reduce food waste",
     "Buy local and seasonal produce",
     "Start composting kitchen waste",
     "Reduce meat consumption",
-    "Use reusable containers for storage"
+    "Use reusable containers"
   ]
 };
 
 const SustainabilityTips = ({ totalEmissions }) => {
-  const [tips, setTips] = useState({
-    TRANSPORT: '',
-    ENERGY: '',
-    FOOD: ''
-  });
+  const [tips, setTips] = useState({});
   const [loading, setLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const getRandomTip = useCallback((category) => {
     const categoryTips = DEFAULT_TIPS[category];
     return categoryTips[Math.floor(Math.random() * categoryTips.length)];
-  }, []); // No dependencies needed as DEFAULT_TIPS is now constant
+  }, []);
 
   const refreshTips = useCallback(() => {
     setLoading(true);
     
-    const newTips = {
-      TRANSPORT: getRandomTip('TRANSPORT'),
-      ENERGY: getRandomTip('ENERGY'),
-      FOOD: getRandomTip('FOOD')
-    };
-    
-    setTips(newTips);
-    setLoading(false);
+    // Simulate API call
+    setTimeout(() => {
+      const newTips = Object.keys(CATEGORIES).reduce((acc, category) => ({
+        ...acc,
+        [category]: getRandomTip(category)
+      }), {});
+      
+      setTips(newTips);
+      setLoading(false);
+    }, 1000);
   }, [getRandomTip]);
 
   useEffect(() => {
     refreshTips();
-  }, [refreshTips]);
+  }, [refreshTips, refreshKey]);
 
   return (
     <Box>
@@ -68,22 +91,24 @@ const SustainabilityTips = ({ totalEmissions }) => {
         <Typography variant="h6">
           Sustainability Tips
         </Typography>
-        <IconButton 
-          onClick={refreshTips} 
-          disabled={loading}
-          sx={{
-            '&:hover': {
-              transform: 'rotate(180deg)',
-              transition: 'transform 0.3s ease-in-out'
-            }
-          }}
-        >
-          {loading ? (
-            <CircularProgress size={24} />
-          ) : (
-            <RefreshIcon />
-          )}
-        </IconButton>
+        <Tooltip title="Get new tips">
+          <IconButton 
+            onClick={() => setRefreshKey(prev => prev + 1)}
+            disabled={loading}
+            sx={{
+              transition: 'transform 0.3s ease',
+              '&:hover': {
+                transform: 'rotate(180deg)'
+              }
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : (
+              <RefreshIcon />
+            )}
+          </IconButton>
+        </Tooltip>
       </Box>
 
       <Box sx={{ 
@@ -91,35 +116,44 @@ const SustainabilityTips = ({ totalEmissions }) => {
         gap: 2,
         flexWrap: { xs: 'wrap', md: 'nowrap' }
       }}>
-        {Object.entries(tips).map(([category, tip]) => (
-          <Paper
-            key={category}
-            elevation={3}
-            sx={{
-              flex: 1,
-              p: 2,
-              minWidth: { xs: '100%', md: '30%' },
-              bgcolor: '#4caf50',
-              color: 'white',
-              borderRadius: 2,
-              transition: 'transform 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-5px)'
-              }
-            }}
-          >
-            <Typography 
-              variant="subtitle2" 
-              gutterBottom
-              sx={{ fontWeight: 'bold' }}
+        <AnimatePresence mode="wait">
+          {Object.entries(CATEGORIES).map(([category, { icon, color }]) => (
+            <motion.div
+              key={`${category}-${refreshKey}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              style={{ flex: 1 }}
             >
-              {category}
-            </Typography>
-            <Typography variant="body2">
-              {tip}
-            </Typography>
-          </Paper>
-        ))}
+              <Card
+                sx={{
+                  height: '100%',
+                  bgcolor: `${color}15`,
+                  borderLeft: `4px solid ${color}`,
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)'
+                  }
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography sx={{ mr: 1 }}>{icon}</Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                      {category}
+                    </Typography>
+                  </Box>
+                  <Fade in={!loading}>
+                    <Typography variant="body2">
+                      {tips[category]}
+                    </Typography>
+                  </Fade>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </Box>
     </Box>
   );

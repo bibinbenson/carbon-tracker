@@ -1,17 +1,43 @@
-import api from './api';
+// frontend/src/services/gamificationService.js
+import axios from 'axios';
 
-export const fetchChallenges = async () => {
-  try {
-    return await api.get('/gamification/challenges');
-  } catch (error) {
-    throw new Error('Failed to fetch challenges');
-  }
-};
+const API_URL = process.env.REACT_APP_API_URL;
 
-export const updateUserProgress = async (userId, progressData) => {
-  try {
-    return await api.post(`/gamification/users/${userId}/progress`, progressData);
-  } catch (error) {
-    throw new Error('Progress update failed');
+export const gamificationService = {
+  async updatePoints(userId, points) {
+    const response = await axios.post(`${API_URL}/users/update-points`, {
+      userId,
+      points
+    });
+    return response.data;
+  },
+
+  async checkAchievements(userId, stats) {
+    const response = await axios.post(`${API_URL}/users/check-achievements`, {
+      userId,
+      stats
+    });
+    return response.data;
+  },
+
+  async getChallenges() {
+    const response = await axios.get(`${API_URL}/challenges/active`);
+    return response.data;
+  },
+
+  async acceptChallenge(userId, challengeId) {
+    const response = await axios.post(`${API_URL}/challenges/accept`, {
+      userId,
+      challengeId
+    });
+    return response.data;
+  },
+
+  async updateChallengeProgress(challengeId, progress) {
+    const response = await axios.post(`${API_URL}/challenges/update-progress`, {
+      challengeId,
+      progress
+    });
+    return response.data;
   }
 };

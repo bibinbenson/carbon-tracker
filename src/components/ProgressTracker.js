@@ -1,89 +1,97 @@
 import React from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, LinearProgress, Grid, Paper } from '@mui/material';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
 
-const ProgressTracker = ({ totalEmissions }) => {
-  const progress = totalEmissions ? Math.min(100, Math.max(0, (100 - totalEmissions / 50))) : 0;
+const ProgressTracker = ({ totalEmissions, userPoints }) => {
+  const formatNumber = (value) => {
+    if (typeof value !== 'number') {
+      value = Number(value);
+    }
+    return isNaN(value) ? '0.00' : value.toFixed(2);
+  };
+
+  const calculateProgress = (current) => {
+    const target = 100; // Example target
+    return Math.min((current / target) * 100, 100);
+  };
+
+  const getEmissionLevel = (emissions) => {
+    if (!emissions) return { color: 'success.main', text: 'No Data' };
+    if (emissions < 50) return { color: 'success.main', text: 'Low' };
+    if (emissions < 100) return { color: 'warning.main', text: 'Moderate' };
+    return { color: 'error.main', text: 'High' };
+  };
+
+  const emissionStats = {
+    transport: totalEmissions ? totalEmissions.transport : 0,
+    energy: totalEmissions ? totalEmissions.energy : 0,
+    food: totalEmissions ? totalEmissions.food : 0
+  };
+
+  const total = Object.values(emissionStats).reduce((sum, val) => sum + val, 0);
+  const emissionLevel = getEmissionLevel(total);
 
   return (
-    <Box sx={{ textAlign: 'center' }}>
-      <Box sx={{ position: 'relative', display: 'inline-flex', mb: 3 }}>
-        <CircularProgress
-          variant="determinate"
-          value={progress}
-          size={200}
-          thickness={4}
-          sx={{
-            color: '#2e7d32',
-            '& .MuiCircularProgress-circle': {
-              strokeLinecap: 'round',
-            }
-          }}
-        />
-        <Box
-          sx={{
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-            position: 'absolute',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography variant="h4">
-            {progress.toFixed(1)}%
-          </Typography>
-        </Box>
-      </Box>
-
+    <Box>
       <Typography variant="h6" gutterBottom>
-        Carbon Reduction
+        Emissions Overview
       </Typography>
 
-      <Button
-        variant="contained"
-        sx={{
-          bgcolor: '#2e7d32',
-          color: 'white',
-          py: 1.5,
-          px: 4,
-          '&:hover': {
-            bgcolor: '#1b5e20',
-            transform: 'scale(1.05)',
-            transition: 'all 0.3s ease',
-          }
-        }}
-      >
-        SHARE PROGRESS
-      </Button>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Total CO₂ Emissions
+            </Typography>
+            <Typography variant="h4" color={emissionLevel.color}>
+              {formatNumber(total)} kg
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Status: {emissionLevel.text}
+            </Typography>
+          </Paper>
+        </Grid>
 
-      {totalEmissions && (
-        <Box sx={{ 
-          mt: 4, 
-          p: 3, 
-          borderRadius: 2,
-          bgcolor: 'rgba(46, 125, 50, 0.1)'
-        }}>
-          <Typography variant="h6" gutterBottom>
-            Total Emissions
-          </Typography>
-          <Typography variant="h5" color="#2e7d32">
-            {totalEmissions.toFixed(1)} kg CO₂
-          </Typography>
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Transport: {(totalEmissions * 0.4).toFixed(1)} kg CO₂
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Energy: {(totalEmissions * 0.35).toFixed(1)} kg CO₂
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Food: {(totalEmissions * 0.25).toFixed(1)} kg CO₂
-            </Typography>
-          </Box>
-        </Box>
-      )}
+        {[
+          { icon: DirectionsCarIcon, label: 'Transport', value: emissionStats.transport },
+          { icon: ElectricBoltIcon, label: 'Energy', value: emissionStats.energy },
+          { icon: RestaurantIcon, label: 'Food', value: emissionStats.food }
+        ].map(({ icon: Icon, label, value }) => (
+          <Grid item xs={12} md={4} key={label}>
+            <Paper sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Icon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="subtitle2">{label}</Typography>
+              </Box>
+              <Typography variant="h6">
+                {formatNumber(value)} kg
+              </Typography>
+              <LinearProgress 
+                variant="determinate" 
+                value={calculateProgress(value)}
+                sx={{ mt: 1 }}
+              />
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Achievement Points
+        </Typography>
+        <Typography variant="h5" color="primary">
+          {userPoints} pts
+        </Typography>
+        <LinearProgress 
+          variant="determinate" 
+          value={calculateProgress(userPoints)}
+          color="success"
+          sx={{ mt: 1 }}
+        />
+      </Box>
     </Box>
   );
 };

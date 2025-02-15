@@ -13,15 +13,18 @@ const TREE_STAGES = {
 const VirtualForest = ({ healthStatus }) => {
   const [trees, setTrees] = useState([]);
 
+  // Fallback logic to prevent NaN
+  const forestHealth = typeof healthStatus === 'number' && !isNaN(healthStatus) ? healthStatus : 0;
+
   useEffect(() => {
-    const treeCount = Math.ceil(healthStatus / 20);
+    const treeCount = Math.ceil(forestHealth / 20); // Divide health into 5 stages
     const newTrees = Array(5).fill(null).map((_, index) => ({
       id: index,
-      stage: index < treeCount ? getTreeStage(healthStatus) : 'SEED',
+      stage: index < treeCount ? getTreeStage(forestHealth) : 'SEED',
       active: index < treeCount
     }));
     setTrees(newTrees);
-  }, [healthStatus]);
+  }, [forestHealth]);
 
   const getTreeStage = (health) => {
     if (health >= 90) return 'MATURE';
@@ -31,7 +34,7 @@ const VirtualForest = ({ healthStatus }) => {
   };
 
   return (
-    <Box sx={{ textAlign: 'center' }}>
+    <Box sx={{ textAlign: 'center', p: 3 }}>
       <Typography variant="h6" gutterBottom>
         Your Virtual Forest
       </Typography>
@@ -42,20 +45,21 @@ const VirtualForest = ({ healthStatus }) => {
         </Typography>
         <LinearProgress
           variant="determinate"
-          value={healthStatus}
+          value={forestHealth}
           sx={{
             height: 10,
             borderRadius: 5,
             bgcolor: 'grey.200',
             '& .MuiLinearProgress-bar': {
-              bgcolor: healthStatus > 70 ? 'success.main' : 
-                      healthStatus > 40 ? 'warning.main' : 'error.main',
+              bgcolor:
+                forestHealth > 70 ? 'success.main' :
+                forestHealth > 40 ? 'warning.main' : 'error.main',
               borderRadius: 5,
             }
           }}
         />
         <Typography variant="body2" sx={{ mt: 1 }}>
-          {healthStatus.toFixed(1)}%
+          {forestHealth.toFixed(1)}%
         </Typography>
       </Box>
 

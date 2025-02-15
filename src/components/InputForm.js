@@ -7,152 +7,234 @@ import {
   Select, 
   MenuItem, 
   Box, 
-  Tooltip, 
-  IconButton,
-  Alert,
-  LinearProgress
+  LinearProgress, 
+  Grid, 
+  Typography,
+  Paper 
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { EMISSION_FACTORS } from '../utils/emissionFactors';
 
 const InputForm = ({ onCalculate }) => {
   const [formData, setFormData] = useState({
     distance: '',
-    transportMode: 'bus',
+    transportMode: 'car',
+    fuelType: 'petrol',
     energyUsage: '',
-    meatMeals: ''
+    energySource: 'electricity',
+    meals: {
+      meat: 0,
+      poultry: 0,
+      vegetarian: 0,
+      vegan: 0
+    },
+    supplyChain: {
+      manufacturing: 0,
+      transportation: 0,
+      packaging: 0
+    }
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleChange = (path, value) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [path]: value
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleNestedChange = (parent, child, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent],
+        [child]: Number(value)
+      }
+    }));
+  };
+
+  const calculateEmissions = () => {
+    // Transport calculations
+    const transportEmissions = formData.distance * 
+      EMISSION_FACTORS.transport[formData.transportMode][formData.fuelType] || 0;
+
+    // Energy calculations
+    const energyEmissions = formData.energyUsage * 
+      EMISSION_FACTORS.energy[formData.energySource];
+
+    // Food calculations
+    const foodEmissions = 
+      (formData.meals.meat * EMISSION_FACTORS.food.meat) +
+      (formData.meals.poultry * EMISSION_FACTORS.food.poultry) +
+      (formData.meals.vegetarian * EMISSION_FACTORS.food.vegetarian) +
+      (formData.meals.vegan * EMISSION_FACTORS.food.vegan);
+
+    // Supply chain calculations
+    const supplyChainEmissions = 
+      (formData.supplyChain.manufacturing * EMISSION_FACTORS.supplyChain.manufacturing) +
+      (formData.supplyChain.transportation * EMISSION_FACTORS.supplyChain.transportation) +
+      (formData.supplyChain.packaging * EMISSION_FACTORS.supplyChain.packaging);
+
+    return {
+      total: transportEmissions + energyEmissions + foodEmissions + supplyChainEmissions,
+      breakdown: {
+        transport: transportEmissions,
+        energy: energyEmissions,
+        food: foodEmissions,
+        supplyChain: supplyChainEmissions
+      },
+      intensity: {
+        transport: transportEmissions / formData.distance,
+        energy: energyEmissions / formData.energyUsage
+      }
+    };
+  };
+
+  const handleSubmit = () => {
     try {
       setLoading(true);
-      setError(null);
-      
-      const emissions = calculateEmissions(formData);
+      const emissions = calculateEmissions();
       onCalculate(emissions, formData);
-      
     } catch (err) {
-      setError('Failed to calculate emissions. Please try again.');
+      setError('Calculation error: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateEmissions = (data) => {
-    const { distance, transportMode, energyUsage, meatMeals } = data;
-    
-    const transportFactor = transportMode === 'car' ? 0.2 : 0.1;
-    const transportEmissions = distance * transportFactor;
-    const energyEmissions = energyUsage * 0.5;
-    const foodEmissions = meatMeals * 2.5;
-    
-    return {
-      total: transportEmissions + energyEmissions + foodEmissions,
-      transport: transportEmissions,
-      energy: energyEmissions,
-      food: foodEmissions
-    };
-  };
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+    <Box sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        Detailed Emissions Calculator
+      </Typography>
 
-      <TextField
-        name="distance"
-        label="Distance (km)"
-        type="number"
-        value={formData.distance}
-        onChange={handleChange}
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <Tooltip title="Enter your total travel distance in kilometers">
-              <IconButton size="small">
-                <InfoIcon />
-              </IconButton>
-            </Tooltip>
-          )
-        }}
-      />
+      <Grid container spacing={3}>
+        {/* Transport Section */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              🚗 Transportation
+            </Typography>
+            <TextField
+              fullWidth
+              label="Distance (km)"
+              type="number"
+              value={formData.distance}
+              onChange={(e) => handleChange('distance', e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Transport Mode</InputLabel>
+              <Select
+                value={formData.transportMode}
+                onChange={(e) => handleChange('transportMode', e.target.value)}
+              >
+                <MenuItem value="car">Car</MenuItem>
+                <MenuItem value="bus">Bus</MenuItem>
+                <MenuItem value="train">Train</MenuItem>
+              </Select>
+            </FormControl>
+            {formData.transportMode === 'car' && (
+              <FormControl fullWidth>
+                <InputLabel>Fuel Type</InputLabel>
+                <Select
+                  value={formData.fuelType}
+                  onChange={(e) => handleChange('fuelType', e.target.value)}
+                >
+                  <MenuItem value="petrol">Petrol</MenuItem>
+                  <MenuItem value="diesel">Diesel</MenuItem>
+                  <MenuItem value="hybrid">Hybrid</MenuItem>
+                  <MenuItem value="electric">Electric</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+          </Paper>
+        </Grid>
 
-      <FormControl fullWidth>
-        <InputLabel>Transport Mode</InputLabel>
-        <Select
-          name="transportMode"
-          value={formData.transportMode}
-          onChange={handleChange}
-        >
-          <MenuItem value="bus">Bus</MenuItem>
-          <MenuItem value="car">Car</MenuItem>
-          <MenuItem value="train">Train</MenuItem>
-        </Select>
-      </FormControl>
+        {/* Energy Section */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              ⚡ Energy Usage
+            </Typography>
+            <TextField
+              fullWidth
+              label="Energy Consumption (kWh)"
+              type="number"
+              value={formData.energyUsage}
+              onChange={(e) => handleChange('energyUsage', e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <FormControl fullWidth>
+              <InputLabel>Energy Source</InputLabel>
+              <Select
+                value={formData.energySource}
+                onChange={(e) => handleChange('energySource', e.target.value)}
+              >
+                <MenuItem value="electricity">Grid Electricity</MenuItem>
+                <MenuItem value="naturalGas">Natural Gas</MenuItem>
+                <MenuItem value="solar">Solar</MenuItem>
+                <MenuItem value="wind">Wind</MenuItem>
+              </Select>
+            </FormControl>
+          </Paper>
+        </Grid>
 
-      <TextField
-        name="energyUsage"
-        label="Energy Usage (kWh)"
-        type="number"
-        value={formData.energyUsage}
-        onChange={handleChange}
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <Tooltip title="Enter your monthly electricity consumption">
-              <IconButton size="small">
-                <InfoIcon />
-              </IconButton>
-            </Tooltip>
-          )
-        }}
-      />
+        {/* Food Section */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              🍽️ Weekly Meals
+            </Typography>
+            {Object.keys(formData.meals).map((mealType) => (
+              <TextField
+                key={mealType}
+                fullWidth
+                label={`${mealType.charAt(0).toUpperCase() + mealType.slice(1)} Meals`}
+                type="number"
+                value={formData.meals[mealType]}
+                onChange={(e) => handleNestedChange('meals', mealType, e.target.value)}
+                sx={{ mb: 2 }}
+              />
+            ))}
+          </Paper>
+        </Grid>
 
-      <TextField
-        name="meatMeals"
-        label="Meat Meals per Week"
-        type="number"
-        value={formData.meatMeals}
-        onChange={handleChange}
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <Tooltip title="Enter number of meat-containing meals per week">
-              <IconButton size="small">
-                <InfoIcon />
-              </IconButton>
-            </Tooltip>
-          )
-        }}
-      />
+        {/* Supply Chain Section */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              🚚 Supply Chain
+            </Typography>
+            {Object.keys(formData.supplyChain).map((category) => (
+              <TextField
+                key={category}
+                fullWidth
+                label={`${category.charAt(0).toUpperCase() + category.slice(1)} ($)`}
+                type="number"
+                value={formData.supplyChain[category]}
+                onChange={(e) => handleNestedChange('supplyChain', category, e.target.value)}
+                sx={{ mb: 2 }}
+              />
+            ))}
+          </Paper>
+        </Grid>
 
-      <Button
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={loading}
-        sx={{
-          py: 2,
-          bgcolor: 'success.main',
-          '&:hover': {
-            bgcolor: 'success.dark'
-          }
-        }}
-      >
-        {loading ? <LinearProgress /> : 'CALCULATE EMISSIONS'}
-      </Button>
+        {/* Submit Section */}
+        <Grid item xs={12}>
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            onClick={handleSubmit}
+            disabled={loading}
+            sx={{ py: 2 }}
+          >
+            {loading ? <LinearProgress /> : 'Calculate Detailed Emissions'}
+          </Button>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

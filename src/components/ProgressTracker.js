@@ -1,99 +1,67 @@
 import React from 'react';
 import { Box, Typography, LinearProgress, Grid, Paper } from '@mui/material';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
 
-const ProgressTracker = ({ totalEmissions, userPoints }) => {
-  const formatNumber = (value) => {
-    if (typeof value !== 'number') {
-      value = Number(value);
-    }
-    return isNaN(value) ? '0.00' : value.toFixed(2);
-  };
+const formatValue = (value) =>
+isNaN(value) ? '0.00' : Math.abs(value).toFixed(2);
 
-  const calculateProgress = (current) => {
-    const target = 100; // Example target
-    return Math.min((current / target) * 100, 100);
-  };
+const ProgressTracker = ({ totalEmissions, intensityMetrics }) => {
+const emissionStats = [
+{ label: 'Transport', value: totalEmissions?.breakdown?.transport || 0 },
+{ label: 'Energy', value: totalEmissions?.breakdown?.energy || 0 },
+{ label: 'Food', value: totalEmissions?.breakdown?.food || 0 },
+{ label: 'Supply Chain', value: totalEmissions?.breakdown?.supplyChain || 0 }
+];
 
-  const getEmissionLevel = (emissions) => {
-    if (!emissions) return { color: 'success.main', text: 'No Data' };
-    if (emissions < 50) return { color: 'success.main', text: 'Low' };
-    if (emissions < 100) return { color: 'warning.main', text: 'Moderate' };
-    return { color: 'error.main', text: 'High' };
-  };
+const intensityStats = [
+{ label: 'Transport Intensity', value: intensityMetrics?.transport || 0, unit: 'kgCO2/km' },
+{ label: 'Energy Intensity', value: intensityMetrics?.energy || 0, unit: 'kgCO2/kWh' }
+];
 
-  const emissionStats = {
-    transport: totalEmissions ? totalEmissions.transport : 0,
-    energy: totalEmissions ? totalEmissions.energy : 0,
-    food: totalEmissions ? totalEmissions.food : 0
-  };
+return (
+<Box sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
+<Typography variant="h6" gutterBottom>
+Emissions Breakdown
+</Typography>
 
-  const total = Object.values(emissionStats).reduce((sum, val) => sum + val, 0);
-  const emissionLevel = getEmissionLevel(total);
+<Grid container spacing={3}>
+{emissionStats.map((stat, index) => (
+<Grid item xs={12} md={3} key={index}>
+<Paper sx={{ p: 2, textAlign: 'center' }}>
+<Typography variant="subtitle2" gutterBottom>
+{stat.label}
+</Typography>
+<Typography variant="h5" color="primary">
+{formatValue(stat.value)} kg
+</Typography>
+<LinearProgress
+variant="determinate"
+value={(stat.value / (totalEmissions?.total || 1)) * 100}
+sx={{ mt: 1, height: 8 }}
+/>
+</Paper>
+</Grid>
+))}
 
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Emissions Overview
-      </Typography>
-
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Total CO₂ Emissions
-            </Typography>
-            <Typography variant="h4" color={emissionLevel.color}>
-              {formatNumber(total)} kg
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Status: {emissionLevel.text}
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {[
-          { icon: DirectionsCarIcon, label: 'Transport', value: emissionStats.transport },
-          { icon: ElectricBoltIcon, label: 'Energy', value: emissionStats.energy },
-          { icon: RestaurantIcon, label: 'Food', value: emissionStats.food }
-        ].map(({ icon: Icon, label, value }) => (
-          <Grid item xs={12} md={4} key={label}>
-            <Paper sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Icon color="primary" sx={{ mr: 1 }} />
-                <Typography variant="subtitle2">{label}</Typography>
-              </Box>
-              <Typography variant="h6">
-                {formatNumber(value)} kg
-              </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={calculateProgress(value)}
-                sx={{ mt: 1 }}
-              />
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Achievement Points
-        </Typography>
-        <Typography variant="h5" color="primary">
-          {userPoints} pts
-        </Typography>
-        <LinearProgress 
-          variant="determinate" 
-          value={calculateProgress(userPoints)}
-          color="success"
-          sx={{ mt: 1 }}
-        />
-      </Box>
-    </Box>
-  );
+{intensityStats.map((stat, index) => (
+<Grid item xs={12} md={6} key={index}>
+<Paper sx={{ p: 2 }}>
+<Typography variant="subtitle2" gutterBottom>
+{stat.label}
+</Typography>
+<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+<Typography variant="h6" color="secondary">
+{formatValue(stat.value)}
+</Typography>
+<Typography variant="body2" color="text.secondary">
+{stat.unit}
+</Typography>
+</Box>
+</Paper>
+</Grid>
+))}
+</Grid>
+</Box>
+);
 };
 
 export default ProgressTracker;

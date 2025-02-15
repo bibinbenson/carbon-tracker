@@ -1,96 +1,93 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+Chart as ChartJS,
+CategoryScale,
+LinearScale,
+PointElement,
+LineElement,
+Title,
+Tooltip,
+Legend,
+Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+CategoryScale,
+LinearScale,
+PointElement,
+LineElement,
+Title,
+Tooltip,
+Legend,
+Filler
 );
 
 const EmissionsChart = ({ data }) => {
-  if (!data || data.length === 0) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 3 }}>
-        <Typography variant="body1" color="text.secondary">
-          No emissions data available yet
-        </Typography>
-      </Box>
-    );
-  }
+const chartData = {
+labels: data?.map(d => d.date) || [],
+datasets: [
+{
+label: 'Transport Emissions',
+data: data?.map(d => d.breakdown?.transport) || [],
+borderColor: '#ff6384',
+backgroundColor: 'rgba(255, 99, 132, 0.2)',
+fill: true
+},
+{
+label: 'Energy Emissions',
+data: data?.map(d => d.breakdown?.energy) || [],
+borderColor: '#36a2eb',
+backgroundColor: 'rgba(54, 162, 235, 0.2)',
+fill: true
+},
+{
+label: 'Food Emissions',
+data: data?.map(d => d.breakdown?.food) || [],
+borderColor: '#4bc0c0',
+backgroundColor: 'rgba(75, 192, 192, 0.2)',
+fill: true
+},
+{
+label: 'Supply Chain',
+data: data?.map(d => d.breakdown?.supplyChain) || [],
+borderColor: '#ff9f40',
+backgroundColor: 'rgba(255, 159, 64, 0.2)',
+fill: true
+}
+]
+};
 
-  const chartData = {
-    labels: data.map(d => d.date),
-    datasets: [
-      {
-        label: 'CO2 Emissions (kg)',
-        data: data.map(d => d.emissions),
-        borderColor: '#2e7d32',
-        backgroundColor: 'rgba(46, 125, 50, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 6
-      }
-    ]
-  };
+const options = {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+title: {
+display: true,
+text: 'Detailed Emissions Over Time'
+},
+tooltip: {
+mode: 'index',
+intersect: false
+}
+},
+scales: {
+y: {
+stacked: true,
+title: {
+display: true,
+text: 'kgCO2e'
+}
+}
+}
+};
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      tooltip: {
-        mode: 'index',
-        intersect: false,
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'CO2 Emissions (kg)'
-        }
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Month'
-        }
-      }
-    }
-  };
-
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Emissions Trend
-      </Typography>
-      <Box sx={{ height: 400 }}>
-        <Line data={chartData} options={options} />
-      </Box>
-    </Box>
-  );
+return (
+<Box sx={{ height: 400 }}>
+<Line data={chartData} options={options} />
+</Box>
+);
 };
 
 export default EmissionsChart;

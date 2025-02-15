@@ -1,53 +1,41 @@
 import { createTheme } from '@mui/material/styles';
 
-export const lightTheme = createTheme({
+const theme = createTheme({
   palette: {
-    mode: 'light',
-    primary: { main: '#2e7d32' },
-    background: { 
-      default: '#f5f5f5',
-      paper: 'rgba(255,255,255,0.9)' 
-    }
+    primary: {
+      main: '#2e7d32', // Green
+    },
+    secondary: {
+      main: '#ff9800', // Orange
+    },
+    background: {
+      default: '#f9f9f9',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#333333',
+      secondary: '#666666',
+    },
   },
-  shadows: Array(25).fill('0 4px 30px rgba(0, 0, 0, 0.05)'),
-  components: {
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            '&.Mui-focused fieldset': {
-              borderColor: '#4caf50',
-              boxShadow: '0 0 0 2px rgba(76,175,80,0.2)'
-            }
-          }
-        }
-      }
-    }
-  }
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+    h1: {
+      fontSize: '2rem',
+      fontWeight: 600,
+    },
+    h2: {
+      fontSize: '1.75rem',
+      fontWeight: 500,
+    },
+    body1: {
+      fontSize: '1rem',
+      lineHeight: 1.6,
+    },
+    body2: {
+      fontSize: '0.875rem',
+      lineHeight: 1.5,
+    },
+  },
 });
 
-export const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: { main: '#4caf50' },
-    background: { 
-      default: '#121212',
-      paper: 'rgba(30,30,30,0.9)' 
-    }
-  },
-  shadows: Array(25).fill('0 4px 30px rgba(255, 255, 255, 0.05)'),
-  components: {
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            '&.Mui-focused fieldset': {
-              borderColor: '#4caf50',
-              boxShadow: '0 0 0 2px rgba(76,175,80,0.2)'
-            }
-          }
-        }
-      }
-    }
-  }
-});
+export default theme;

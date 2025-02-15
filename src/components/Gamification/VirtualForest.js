@@ -17,7 +17,7 @@ const VirtualForest = ({ healthStatus }) => {
   const forestHealth = typeof healthStatus === 'number' && !isNaN(healthStatus) ? healthStatus : 0;
 
   useEffect(() => {
-    const treeCount = Math.ceil(forestHealth / 20); // Divide health into 5 stages
+    const treeCount = Math.ceil(forestHealth / 20); // Divide health into stages
     const newTrees = Array(5).fill(null).map((_, index) => ({
       id: index,
       stage: index < treeCount ? getTreeStage(forestHealth) : 'SEED',
@@ -90,7 +90,7 @@ const VirtualForest = ({ healthStatus }) => {
                   fontSize: '2rem',
                   cursor: 'pointer',
                   filter: tree.active ? 'none' : 'grayscale(100%)',
-                  transition: 'all 0.3s ease'
+                  transition: 'all .3s ease'
                 }}
               >
                 {TREE_STAGES[tree.stage]}
